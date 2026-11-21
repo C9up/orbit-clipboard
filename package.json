@@ -14,7 +14,8 @@
     ".": {
       "react-native": "./src/index.rn.ts",
       "types": "./src/index.ts",
-      "import": "./src/index.ts"
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
     }
   },
   "react-native": {
@@ -62,7 +63,8 @@
       ".": {
         "react-native": "./dist/index.rn.js",
         "types": "./dist/index.d.ts",
-        "import": "./dist/index.js"
+        "import": "./dist/index.js",
+        "default": "./dist/index.js"
       }
     },
     "access": "public"
