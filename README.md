@@ -23,7 +23,7 @@ Plain text only.
 
 ## Errors
 
-Every failure is an `OrbitClipboardError` with a `code`:
+Every failure carries a `code`, and is an instance of the class of that name in the `errors` export (`error instanceof errors.E_ORBIT_CLIPBOARD_DENIED`):
 
 | Code | Cause |
 |---|---|

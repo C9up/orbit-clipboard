@@ -11,9 +11,14 @@
  * which calls the app's OrbitClipboard module. On the server there is no
  * clipboard: both calls reject with `E_ORBIT_CLIPBOARD_UNAVAILABLE`.
  */
-import { codeOf, OrbitClipboardError } from "./errors.js";
+import type { Exception } from "@c9up/flare";
+import {
+	E_ORBIT_CLIPBOARD_DENIED,
+	E_ORBIT_CLIPBOARD_UNAVAILABLE,
+} from "./errors.js";
+import { codeOf, messageOf } from "./platform.js";
 
-export { OrbitClipboardError, type OrbitClipboardErrorCode } from "./errors.js";
+export * as errors from "./errors.js";
 
 interface WebClipboard {
 	writeText(text: string): Promise<void>;
@@ -36,22 +41,19 @@ function webClipboard(): WebClipboard {
 			? Reflect.get(navigator, "clipboard")
 			: undefined;
 	if (!isWebClipboard(clipboard)) {
-		throw new OrbitClipboardError(
-			"E_ORBIT_CLIPBOARD_UNAVAILABLE",
-			"[orbit-clipboard] no clipboard here: the server, or a page that is not a secure context (https, localhost)",
-		);
+		throw new E_ORBIT_CLIPBOARD_UNAVAILABLE([
+			"no clipboard here: the server, or a page that is not a secure context (https, localhost)",
+		]);
 	}
 	return clipboard;
 }
 
-function refused(error: unknown): OrbitClipboardError {
-	return new OrbitClipboardError(
+function refused(error: unknown): Exception {
+	const Refusal =
 		codeOf(error) === "NotAllowedError"
-			? "E_ORBIT_CLIPBOARD_DENIED"
-			: "E_ORBIT_CLIPBOARD_UNAVAILABLE",
-		`[orbit-clipboard] ${error instanceof Error ? error.message : String(error)}`,
-		{ cause: error },
-	);
+			? E_ORBIT_CLIPBOARD_DENIED
+			: E_ORBIT_CLIPBOARD_UNAVAILABLE;
+	return new Refusal([messageOf(error)], { cause: error });
 }
 
 /** Put `text` on the system clipboard. */

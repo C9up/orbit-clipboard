@@ -5,9 +5,14 @@
  * in place of index.ts (the `react-native` condition and field); it exports
  * what index.ts exports.
  */
-import { codeOf, OrbitClipboardError } from "./errors.js";
+import type { Exception } from "@c9up/flare";
+import {
+	E_ORBIT_CLIPBOARD_DENIED,
+	E_ORBIT_CLIPBOARD_UNAVAILABLE,
+} from "./errors.js";
+import { codeOf, messageOf } from "./platform.js";
 
-export { OrbitClipboardError, type OrbitClipboardErrorCode } from "./errors.js";
+export * as errors from "./errors.js";
 
 interface NativeClipboard {
 	writeText(text: string): Promise<void>;
@@ -46,22 +51,19 @@ let cached: NativeClipboard | undefined;
 function native(): NativeClipboard {
 	cached ??= lookup();
 	if (cached === undefined) {
-		throw new OrbitClipboardError(
-			"E_ORBIT_CLIPBOARD_UNAVAILABLE",
-			"[orbit-clipboard] the OrbitClipboard module is not in the app: build it with `ream android:*`, whose autolinking adds it",
-		);
+		throw new E_ORBIT_CLIPBOARD_UNAVAILABLE([
+			"the OrbitClipboard module is not in the app: build it with `ream android:*`, whose autolinking adds it",
+		]);
 	}
 	return cached;
 }
 
-function refused(error: unknown): OrbitClipboardError {
-	return new OrbitClipboardError(
+function refused(error: unknown): Exception {
+	const Refusal =
 		codeOf(error) === "E_ORBIT_CLIPBOARD_DENIED"
-			? "E_ORBIT_CLIPBOARD_DENIED"
-			: "E_ORBIT_CLIPBOARD_UNAVAILABLE",
-		`[orbit-clipboard] ${error instanceof Error ? error.message : String(error)}`,
-		{ cause: error },
-	);
+			? E_ORBIT_CLIPBOARD_DENIED
+			: E_ORBIT_CLIPBOARD_UNAVAILABLE;
+	return new Refusal([messageOf(error)], { cause: error });
 }
 
 /** Put `text` on the system clipboard. */

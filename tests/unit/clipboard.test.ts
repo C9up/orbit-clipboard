@@ -45,9 +45,9 @@ describe("in the browser", () => {
 			clipboard: fakeClipboard({ name: "NotAllowedError" }),
 		});
 		const web = await import("../../src/index.js");
-		await expect(web.readText()).rejects.toMatchObject({
-			code: "E_ORBIT_CLIPBOARD_DENIED",
-		});
+		const denied = await web.readText().catch((error: unknown) => error);
+		expect(denied).toBeInstanceOf(web.errors.E_ORBIT_CLIPBOARD_DENIED);
+		expect(denied).toMatchObject({ code: "E_ORBIT_CLIPBOARD_DENIED" });
 		vi.stubGlobal("navigator", {});
 		await expect(web.writeText("x")).rejects.toMatchObject({
 			code: "E_ORBIT_CLIPBOARD_UNAVAILABLE",
